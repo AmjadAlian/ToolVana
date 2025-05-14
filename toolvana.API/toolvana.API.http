@@ -1,0 +1,6 @@
+@toolvana.API_HostAddress = http://localhost:5276
+
+GET {{toolvana.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
