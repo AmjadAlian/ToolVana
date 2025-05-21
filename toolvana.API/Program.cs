@@ -1,6 +1,10 @@
 
+using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using toolvana.API.Data;
+using toolvana.API.Services.Brands;
+using toolvana.API.Services.Categories;
+using toolvana.API.Services.Products;
 
 namespace toolvana.API
 {
@@ -16,6 +20,12 @@ namespace toolvana.API
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+            );
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IProductService,ProductService>();
+            builder.Services.AddScoped<IBrandService,BrandService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -29,17 +39,8 @@ namespace toolvana.API
 
             app.UseAuthorization();
 
-            var context = new ApplicationDbContext();
+           
 
-            try
-            {
-                context.Database.CanConnect();
-                Console.WriteLine("Database connection successful.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("error");
-            }
             app.MapControllers();
 
             app.Run();

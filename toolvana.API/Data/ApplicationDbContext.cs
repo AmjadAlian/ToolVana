@@ -1,12 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using toolvana.API.Models;
 
 namespace toolvana.API.Data
 {
-    public class ApplicationDbContext:DbContext
+    public class ApplicationDbContext : DbContext
     {
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
-            optionsBuilder.UseSqlServer("Server =.; Database = toolvana; trustServerCertificate= true; trusted_connection=true");
+
         }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Brand> Brands { get; set; }
     }
+
 }
