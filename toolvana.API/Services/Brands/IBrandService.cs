@@ -8,7 +8,7 @@ namespace toolvana.API.Services.Brands
          IEnumerable<Brand> GetAll();
         Brand? GetBrand(Expression<Func<Brand,bool>> expression);
         Brand Add(IFormFile file,Brand brand);
-        bool Edit(int id, IFormFile file ,Brand brand);
+        bool Edit(int id, IFormFile? file ,Brand brand);
         bool Remove(int id);
     }
 }

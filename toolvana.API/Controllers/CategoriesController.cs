@@ -1,6 +1,8 @@
 ﻿using Mapster;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using toolvana.API.Data;
 using toolvana.API.DTOs.Requests.Category;
 using toolvana.API.DTOs.Responses.Category;
@@ -11,39 +13,39 @@ namespace toolvana.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController (ICategoryService categoryService) : ControllerBase
+    public class CategoriesController (ICategoryService categoryService ) : ControllerBase
     {
         private readonly ICategoryService categoryService = categoryService;
 
      
 
         [HttpGet("")]
-        public IActionResult GetCategories()
+        public async Task<IActionResult> GetCategories(string query)
         {
-            var categories = categoryService.GetAll().ToList();
+            var categories =await categoryService.GetAsync();
 
-            return categories.Count == 0 ? NotFound() : Ok(categories.Adapt<IEnumerable <CategoryResponse>>());
+            return categories == null ? NotFound() : Ok(categories.Adapt<IEnumerable <CategoryResponse>>());
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetCategoryById([FromRoute] int id)
+        public async Task<IActionResult> GetCategoryById([FromRoute] int id)
         {
-            var category = categoryService.Get(c => c.Id == id);
+            var category = await categoryService.GetOneAsync(c => c.Id == id);
 
             return category == null ? NotFound() : Ok(category.Adapt<CategoryResponse>());
         }
         [HttpPost("")]
-        public IActionResult CreateCategory([FromForm] CategoryRequest categoryRequest)
+        public async Task<IActionResult> CreateCategory([FromBody] CategoryRequest categoryRequest, CancellationToken cancellationToken = default)
         {
             var category = categoryRequest.Adapt<Category>();
-            categoryService.Add(category);
+            await categoryService.AddAsync(category,cancellationToken);
             
             return CreatedAtAction(nameof(GetCategoryById), new { id = category.Id }, category);
         }
         [HttpPut("{id}")]
-        public IActionResult UpdateCategory([FromRoute] int id, [FromForm] CategoryRequest category)
+        public async Task <IActionResult> UpdateCategory([FromRoute] int id, [FromForm] CategoryRequest category , CancellationToken cancellationToken = default)
         {
-            var categoryDb = categoryService.Edit(id, category.Adapt<Category>());
+            var categoryDb = await categoryService.EditAsync(id, category.Adapt<Category>() , cancellationToken);
             if (categoryDb == false)
             {
                 return NotFound();
@@ -52,9 +54,9 @@ namespace toolvana.API.Controllers
             return NoContent();
         }
         [HttpDelete("{id}")]
-        public IActionResult DeleteCategory([FromRoute]int id)
+        public async Task<IActionResult> DeleteCategory([FromRoute]int id)
         {
-           var category =  categoryService.Remove(id);
+           var category =await categoryService.RemoveAsync(id);
             return category == true? NoContent():NotFound();
         }
     }

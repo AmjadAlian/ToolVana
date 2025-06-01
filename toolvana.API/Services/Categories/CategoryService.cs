@@ -1,65 +1,43 @@
-﻿using System.Linq.Expressions;
+﻿using System.Data;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using toolvana.API.Data;
 using toolvana.API.Models;
+using toolvana.API.Services.GenericService;
 
 namespace toolvana.API.Services.Categories
 {
-    public class CategoryService : ICategoryService
+    public class CategoryService : Service< Category>, ICategoryService
     {
-        private readonly ApplicationDbContext context;
-
-        public CategoryService(ApplicationDbContext context)
-        {
-            this.context = context;
-        }
-        public Category Add(Category category)
-        {
-
-            context.Categories.Add(category);
-            context.SaveChanges();
-            return category;
-        
-        }
         
 
-        public bool Edit(int id, Category category)
+        public CategoryService(ApplicationDbContext context) : base(context)
         {
-            var CategoryInDb = context.Categories.AsNoTracking().FirstOrDefault(c=> c.Id == id);
+           
+        }
+        public async Task<bool> EditAsync(int id, Category category , CancellationToken cancellationToken = default)
+        {
+            var CategoryInDb = _context.Categories.Find( id);
             if (CategoryInDb == null)
             {
                 return false;
             }
-            category.Id = id;   
-            context.Categories.Update(category);
-            context.SaveChanges();
+           
+            CategoryInDb.Name = category.Name;
+            CategoryInDb.Description = category.Description;
+           await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
-
-        public Category? Get(Expression<Func<Category, bool>> expression)
+        public async Task<bool> UpdateStatusAsync(int id , CancellationToken cancellationToken)
         {
-            return context.Categories.FirstOrDefault(expression);
-
-        }
-
-        public IEnumerable<Category> GetAll()
-        {
-           var categories = context.Categories.ToList();
-            return categories;
-        }
-
-        public bool Remove(int id)
-        {
-            var category = context.Categories.Find(id);
-            if (category == null)
-            {
-                return false;
-            }
-            context.Categories.Remove(category);
-            context.SaveChanges();
+            var categoryInDb = _context.Categories.Find(id);
+            if (categoryInDb == null) return false;
+            categoryInDb.Status = !categoryInDb.Status;
+            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
     }

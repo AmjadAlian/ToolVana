@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using toolvana.API.Data;
@@ -88,9 +89,26 @@ namespace toolvana.API.Services.Products
             return false;
         }
 
-        public IEnumerable<Product> GetAll()
+        public IEnumerable<Product> GetAll( string? query,  int page, int limit)
         {
-            return context.Products.ToList();
+            IQueryable <Product> products = context.Products;
+            if (!string.IsNullOrEmpty(query))
+            {
+                return products
+                    .Where(p => p.Name.Contains(query) || p.Description.Contains(query))
+                    .Skip((page - 1) * limit)
+                    .Take(limit)
+                    .ToList();
+            }
+
+            if(limit <=0 || page <= 0)
+            {
+                page = 1;
+                limit = 10;
+            }
+
+
+            return products.Skip((page - 1) * limit).Take(limit);
            
         }
 

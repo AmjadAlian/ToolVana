@@ -1,7 +1,9 @@
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using toolvana.API.Data;
+using toolvana.API.Models;
 using toolvana.API.Services.Brands;
 using toolvana.API.Services.Categories;
 using toolvana.API.Services.Products;
@@ -17,7 +19,7 @@ namespace toolvana.API
             // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+           
             builder.Services.AddOpenApi();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -26,6 +28,14 @@ namespace toolvana.API
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IProductService,ProductService>();
             builder.Services.AddScoped<IBrandService,BrandService>();
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+
+                options.User.RequireUniqueEmail = true;
+            })
+               .AddEntityFrameworkStores<ApplicationDbContext>()
+               .AddDefaultTokenProviders();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -25,11 +25,16 @@ namespace toolvana.API.Controllers
         }
 
         [HttpGet("")]
-        public IActionResult GetProducts()
+        public IActionResult GetProducts([FromQuery] string?query , [FromQuery] int page, [FromQuery] int limit)
         {
-            var products = productService.GetAll().ToList();
+            var products = productService.GetAll(query , page , limit).ToList();
+            if (products == null || products.Count == 0)
+            {
+                return NotFound();
+            }
             return Ok(products.Adapt<IEnumerable<ProductResponse>>());
         }
+
         [HttpGet("{id}")]
         public IActionResult GetById([FromRoute] int id)
         {
@@ -40,6 +45,7 @@ namespace toolvana.API.Controllers
             }
             return Ok(product.Adapt<ProductResponse>());
         }
+
         [HttpPost("")]
         public IActionResult CreateProduct([FromForm] ProductRequest productRequest)
         {
@@ -54,7 +60,7 @@ namespace toolvana.API.Controllers
 
             return BadRequest();
         }
-        [HttpPut("{id}")]
+        [HttpPatch("{id}")]
         public IActionResult UpdateProduct([FromRoute] int id, [FromForm] EditProductRequest productRequest)
         {
            

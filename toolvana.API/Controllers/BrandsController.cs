@@ -18,6 +18,12 @@ namespace toolvana.API.Controllers
         {
             this.brandService = brandService;
         }
+        [HttpGet("")]
+        public IActionResult GetAll()
+        {
+            var brands = brandService.GetAll().ToList();
+            return Ok(brands.Adapt<IEnumerable<BrandResponse>>());
+        }
         [HttpGet("{id}")]
         public IActionResult GetById(int id) {
             var brand = brandService.GetBrand(b =>b.Id == id);
@@ -28,7 +34,7 @@ namespace toolvana.API.Controllers
             return Ok(brand.Adapt<BrandResponse>());
         }
         [HttpPost("")]
-        public IActionResult CreateBrand([FromForm] BrandRequest brandRequest)
+        public IActionResult Create([FromForm] BrandRequest brandRequest)
         {
 
             if (brandRequest != null)
@@ -38,14 +44,31 @@ namespace toolvana.API.Controllers
                 
                     var brand = brandRequest.Adapt<Brand>();
                     brandService.Add(brandRequest.LogoUrl, brand);
-
-                    return CreatedAtAction(nameof(GetById),new{ id = brand.Id},brand);
+                    var brandResponse = brand.Adapt<BrandResponse>();
+                    return CreatedAtAction(nameof(GetById),new{ id = brand.Id}, brandResponse);
 
                 }
                
             }
 
             return BadRequest();
+        }
+
+        [HttpPatch("{id}")]
+        public IActionResult Edit([FromRoute] int id, [FromForm] EditBrandRequest brandRequest)
+        {
+            if (brandRequest != null && id > 0)
+            {
+                var brand = brandService.Edit(id, brandRequest.LogoUrl, brandRequest.Adapt<Brand>());
+
+                if (brand == false)
+                {
+                    return NotFound();
+                }
+            }
+
+
+            return NoContent();
         }
     }
 }
